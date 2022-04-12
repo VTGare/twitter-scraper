@@ -97,6 +97,34 @@ func TestGetTweet(t *testing.T) {
 	}
 }
 
+func TestGetTweetWithGIF(t *testing.T) {
+	sample := twitterscraper.Tweet{
+		HTML:         `Keep your fave DM convos easily accessible by pinning them! You can now pin up to six conversations that will stay at the top of your DM inbox.<br><br>Available on Android, iOS, and web. <br><a href="https://t.co/kIjlzf9XLJ"><img src="https://pbs.twimg.com/tweet_video_thumb/FL0gdK8WUAIHHKa.jpg"/></a>`,
+		ID:           "1494386367467593737",
+		PermanentURL: "https://twitter.com/TwitterSupport/status/1494386367467593737",
+		Photos:       []string{"https://pbs.twimg.com/tweet_video_thumb/FL0gdK8WUAIHHKa.jpg"},
+		Text:         "Keep your fave DM convos easily accessible by pinning them! You can now pin up to six conversations that will stay at the top of your DM inbox.\n\nAvailable on Android, iOS, and web. https://t.co/kIjlzf9XLJ",
+		TimeParsed:   time.Date(2022, time.February, 17, 19, 0, 49, 0, time.FixedZone("UTC", 0)),
+		Timestamp:    1645124449,
+		UserID:       "17874544",
+		Username:     "TwitterSupport",
+		Videos: []twitterscraper.Video{{
+			ID:      "1494386336882642946",
+			Preview: "https://pbs.twimg.com/tweet_video_thumb/FL0gdK8WUAIHHKa.jpg",
+			URL:     "https://video.twimg.com/tweet_video/FL0gdK8WUAIHHKa.mp4",
+		}},
+	}
+
+	tweet, err := twitterscraper.GetTweet("1494386367467593737")
+	if err != nil {
+		t.Error(err)
+	} else {
+		if diff := cmp.Diff(sample, *tweet, cmpOptions...); diff != "" {
+			t.Error("Resulting tweet does not match the sample", diff)
+		}
+	}
+}
+
 func TestQuotedAndReply(t *testing.T) {
 	sample := &twitterscraper.Tweet{
 		HTML:         "The Easiest Problem Everyone Gets Wrong <br><br>[new video] --&gt; <a href=\"https://youtu.be/ytfCdqWhmdg\">https://t.co/YdaeDYmPAU</a> <br><a href=\"https://t.co/iKu4Xs6o2V\"><img src=\"https://pbs.twimg.com/media/ESsZa9AXgAIAYnF.jpg\"/></a>",

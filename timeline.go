@@ -200,21 +200,30 @@ func (timeline *timeline) parseTweet(id string) *Tweet {
 		}
 
 		for _, media := range tweet.ExtendedEntities.Media {
-			if media.Type == "photo" {
+			switch media.Type {
+			case "photo":
 				tw.Photos = append(tw.Photos, media.MediaURLHttps)
-			}
+			case "animated_gif":
+				fallthrough
+			case "video":
+				if len(media.VideoInfo.Variants) == 0 {
+					continue
+				}
 
-			if media.Type == "video" {
+				variant := media.VideoInfo.Variants[0]
 				video := Video{
 					ID:      media.IDStr,
 					Preview: media.MediaURLHttps,
+					URL:     strings.TrimSuffix(variant.URL, "?tag=10"),
 				}
 
-				maxBitrate := 0
-				for _, variant := range media.VideoInfo.Variants {
-					if variant.Bitrate > maxBitrate {
-						video.URL = strings.TrimSuffix(variant.URL, "?tag=10")
-						maxBitrate = variant.Bitrate
+				if len(media.VideoInfo.Variants) > 1 {
+					maxBitrate := variant.Bitrate
+					for _, variant := range media.VideoInfo.Variants[1:] {
+						if variant.Bitrate > maxBitrate {
+							video.URL = strings.TrimSuffix(variant.URL, "?tag=10")
+							maxBitrate = variant.Bitrate
+						}
 					}
 				}
 
